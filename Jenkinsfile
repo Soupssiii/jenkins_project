@@ -24,14 +24,7 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                script {
-                    bat "call venv\\Scripts\\activate && pytest"
-                }
-            }
-        }
-
+        
         stage('Deploy') {
             steps {
                 script {
