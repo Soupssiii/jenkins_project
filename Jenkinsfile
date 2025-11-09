@@ -36,9 +36,15 @@ pipeline {
 
         stage('Security Scan') {
             steps {
-                bat "call ${VIRTUAL_ENV}\\Scripts\\activate && bandit -r ."
+                bat '''
+                chcp 65001
+                call venv\\Scripts\\activate
+                bandit -r . > bandit_report.txt
+                type bandit_report.txt
+                '''
             }
         }
+
 
         stage('Deploy') {
             steps {
