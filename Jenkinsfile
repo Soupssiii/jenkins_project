@@ -1,38 +1,42 @@
 pipeline {
     agent any
-    environment { VIRTUAL_ENV = 'venv' }
+    environment { 
+        VIRTUAL_ENV = 'venv'
+    }
 
     stages {
         stage('Setup') {
             steps {
                 script {
-                    // Create virtual environment
-                    bat "\"C:\\Users\\Cirin\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\" -m venv ${VIRTUAL_ENV}"
-                    
-                    // Upgrade pip safely
-                    bat "call ${VIRTUAL_ENV}\\Scripts\\activate && ${VIRTUAL_ENV}\\Scripts\\python.exe -m pip install --upgrade pip"
-                    
-                    // Install dependencies
-                    bat "call ${VIRTUAL_ENV}\\Scripts\\activate && pip install -r requirements.txt"
+                    if (!fileExists("${env.WORKSPACE}/${VIRTUAL_ENV}")) {
+                        sh "python -m venv ${VIRTUAL_ENV}"
+                    }
+                    sh "source ${VIRTUAL_ENV}/bin/activate && pip install -r requirements.txt"
                 }
             }
         }
 
         stage('Lint') {
             steps {
-                bat "call ${VIRTUAL_ENV}\\Scripts\\activate && flake8 app.py"
+                script {
+                    sh "source ${VIRTUAL_ENV}/bin/activate && flake8 app.py"
+                }
             }
         }
 
         stage('Test') {
             steps {
-                bat "call ${VIRTUAL_ENV}\\Scripts\\activate && pytest"
+                script {
+                    sh "source ${VIRTUAL_ENV}/bin/activate && pytest"
+                }
             }
         }
 
         stage('Deploy') {
             steps {
-                echo "Deploying application..."
+                script {
+                    echo "Deploying application..."
+                }
             }
         }
     }
