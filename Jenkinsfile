@@ -8,28 +8,41 @@ pipeline {
         stage('Setup') {
             steps {
                 script {
-                    if (!fileExists("${env.WORKSPACE}\\${VIRTUAL_ENV}")) {
-                        bat "\"C:\\Users\\Cirin\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\" -m venv venv"
-                    }
-                    bat "call venv\\Scripts\\activate && pip install -r requirements.txt"
+                    // Create venv and install dependencies
+                    bat "\"C:\\Users\\Cirin\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\" -m venv ${VIRTUAL_ENV}"
+                    bat "call ${VIRTUAL_ENV}\\Scripts\\activate && ${VIRTUAL_ENV}\\Scripts\\python.exe -m pip install --upgrade pip"
+                    bat "call ${VIRTUAL_ENV}\\Scripts\\activate && pip install -r requirements.txt"
                 }
             }
         }
 
         stage('Lint') {
             steps {
-                script {
-                    bat "call venv\\Scripts\\activate && flake8 app.py"
-                }
+                bat "call ${VIRTUAL_ENV}\\Scripts\\activate && flake8 app.py"
             }
         }
 
-        
+        stage('Test') {
+            steps {
+                bat "call ${VIRTUAL_ENV}\\Scripts\\activate && pytest"
+            }
+        }
+
+        stage('Coverage') {
+            steps {
+                bat "call ${VIRTUAL_ENV}\\Scripts\\activate && coverage run -m pytest && coverage report"
+            }
+        }
+
+        stage('Security Scan') {
+            steps {
+                bat "call ${VIRTUAL_ENV}\\Scripts\\activate && bandit -r ."
+            }
+        }
+
         stage('Deploy') {
             steps {
-                script {
-                    echo 'Deploying application...'
-                }
+                echo "Deploying application..."
             }
         }
     }
